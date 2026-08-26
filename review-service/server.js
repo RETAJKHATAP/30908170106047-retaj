@@ -60,9 +60,16 @@ app.delete("/reviews/:id", (req, res) => {
   res.json({ message: "Review deleted" });
 });
 
-// 🔹 Dynamic port (مهم للـ Render)
+// 🔹 Dynamic port (مهم محلياً)
 const PORT = process.env.PORT || 4001;
 
-app.listen(PORT, () => {
-  console.log(`Review Service running on port ${PORT}`);
-});
+// Only start a listening server when run directly (local dev).
+// On Vercel, this file is required by api/index.js instead, which
+// exports the app as a serverless function handler.
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Review Service running on port ${PORT}`);
+  });
+}
+
+module.exports = app;
