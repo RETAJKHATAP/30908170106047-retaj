@@ -1,16 +1,13 @@
 const logger = require('../utils/logger');
 
-// Logs one structured entry per request, once it finishes, with the
-// response status code and how long it took.
+// Logs one structured entry as soon as each request arrives. We log on
+// entry (not on the response 'finish' event) because Vercel's serverless
+// functions can freeze/terminate right after the response is sent, before
+// a 'finish' listener gets a chance to run.
 const requestLogger = (req, res, next) => {
-  const start = Date.now();
-  res.on('finish', () => {
-    logger.info('request', {
-      method: req.method,
-      path: req.originalUrl,
-      statusCode: res.statusCode,
-      durationMs: Date.now() - start,
-    });
+  logger.info('request', {
+    method: req.method,
+    path: req.originalUrl,
   });
   next();
 };
