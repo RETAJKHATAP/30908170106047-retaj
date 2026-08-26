@@ -77,3 +77,23 @@ Confirm the monitor reports the service as UP.
 - [ ] Rate limiting is active
 - [ ] `/api/health` returns HTTP 200 publicly
 - [ ] UptimeRobot (or equivalent) reports the health endpoint as UP
+
+## 7. Production Operations (Task 4)
+
+### CI/CD pipeline
+
+`.github/workflows/ci-cd.yml` installs dependencies, builds, and deploys the backend and frontend to Vercel production whenever a change is merged into `main`. Deployment credentials (`VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_BACKEND_PROJECT_ID`, `VERCEL_FRONTEND_PROJECT_ID`) are stored as GitHub Actions secrets, never in the workflow file. Three GitHub Environments (`development`, `staging`, `production`) are configured, each with its own set of environment variables. The `main` branch is protected and only accepts a merge once the pipeline's build job succeeds.
+
+### Structured logging
+
+The backend logs every request and every error as a single JSON line, each carrying an ISO `timestamp` and a severity `level` (`info` for requests, `error` for errors). See `backend/src/utils/logger.js`, `backend/src/middleware/requestLogger.js`, and `backend/src/middleware/errorMiddleware.js`.
+
+**These logs are read in production from the Vercel dashboard:** open the backend project → **Logs** tab (or **Deployments → \[a deployment\] → Runtime Logs**).
+
+### Rollback plan
+
+See [`docs/30908170106047-ShopSphere-Rollback-Plan.md`](docs/30908170106047-ShopSphere-Rollback-Plan.md).
+
+### Project links
+
+See [`docs/30908170106047-ShopSphere.md`](docs/30908170106047-ShopSphere.md) for the application, review service, and repository URLs.

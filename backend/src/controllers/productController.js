@@ -1,7 +1,6 @@
 const asyncHandler = require('express-async-handler');
 const { query } = require('../config/db');
 const { normalize } = require('../models/Product');
-const axios = require("axios"); // 🔥 مهم
 
 // 🔹 GET all products
 const getProducts = asyncHandler(async (req, res) => {
@@ -68,7 +67,11 @@ const getProducts = asyncHandler(async (req, res) => {
   });
 });
 
-// 🔥 GET product by ID + Reviews from Microservice
+// 🔹 GET product by ID
+// Note: reviews are NOT fetched here. The review service was fully
+// extracted in Task 3 — the frontend calls it directly over REST
+// (see frontend/src/api/reviewClient.js), so the main application
+// no longer contains any review-fetching logic.
 const getProductById = asyncHandler(async (req, res) => {
   const { rows } = await query(
     'SELECT * FROM products WHERE id=$1',
@@ -82,22 +85,9 @@ const getProductById = asyncHandler(async (req, res) => {
 
   const product = normalize(rows[0]);
 
-  // 🔥 call Review Service
-  const reviewsRes = await axios.get(
-    "https://30908170106047-shopsphere-review-service-production.up.railway.app/reviews"
-  );
-
-  // 🔥 filter reviews for this product
-  const productReviews = reviewsRes.data.filter(
-    r => r.productId == product.id
-  );
-
   res.json({
     success: true,
-    data: {
-      ...product,
-      reviews: productReviews
-    }
+    data: product
   });
 });
 
