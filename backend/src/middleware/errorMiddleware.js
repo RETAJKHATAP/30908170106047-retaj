@@ -1,3 +1,5 @@
+const logger = require('../utils/logger');
+
 const notFound = (req, res, next) => {
   const error = new Error(`Route not found - ${req.originalUrl}`);
   res.status(404);
@@ -27,6 +29,13 @@ const errorHandler = (err, req, res, next) => {
     const field = Object.keys(err.keyValue || {})[0];
     message = `${field ? field.charAt(0).toUpperCase() + field.slice(1) : 'Field'} already in use`;
   }
+
+  logger.error('request_error', {
+    method: req.method,
+    path: req.originalUrl,
+    statusCode,
+    message,
+  });
 
   res.status(statusCode).json({
     success: false,

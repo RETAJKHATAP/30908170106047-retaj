@@ -1,6 +1,8 @@
 const path=require('path');const express=require('express');const cors=require('cors');const helmet=require('helmet');const cookieParser=require('cookie-parser');const rateLimit=require('express-rate-limit');
 const authRoutes=require('./routes/authRoutes');const productRoutes=require('./routes/productRoutes');const cartRoutes=require('./routes/cartRoutes');const orderRoutes=require('./routes/orderRoutes');const {notFound,errorHandler}=require('./middleware/errorMiddleware');
+const requestLogger=require('./middleware/requestLogger');
 const app=express();
+app.use(requestLogger);
 app.set('trust proxy',1);
 app.disable('x-powered-by');
 app.use(helmet({crossOriginResourcePolicy:false}));
