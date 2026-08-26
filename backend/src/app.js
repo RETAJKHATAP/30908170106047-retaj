@@ -1,0 +1,12 @@
+const path=require('path');const express=require('express');const cors=require('cors');const helmet=require('helmet');const cookieParser=require('cookie-parser');const rateLimit=require('express-rate-limit');
+const authRoutes=require('./routes/authRoutes');const productRoutes=require('./routes/productRoutes');const cartRoutes=require('./routes/cartRoutes');const orderRoutes=require('./routes/orderRoutes');const {notFound,errorHandler}=require('./middleware/errorMiddleware');
+const app=express();
+app.set('trust proxy',1);
+app.disable('x-powered-by');
+app.use(helmet({crossOriginResourcePolicy:false}));
+app.use(cors({origin:process.env.CLIENT_URL||'http://localhost:5173',credentials:true}));
+app.use(rateLimit({windowMs:15*60*1000,max:300,standardHeaders:'draft-7',legacyHeaders:false,message:{success:false,message:'Too many requests, please try again later.'}}));
+app.use(express.json());app.use(express.urlencoded({extended:true}));app.use(cookieParser());
+app.use('/uploads',express.static(path.join(__dirname,'..','uploads')));
+app.get('/api/health',(req,res)=>res.status(200).json({success:true,message:'API is running',timestamp:new Date().toISOString()}));
+app.use('/api/auth',authRoutes);app.use('/api/products',productRoutes);app.use('/api/cart',cartRoutes);app.use('/api/orders',orderRoutes);app.use(notFound);app.use(errorHandler);module.exports=app;

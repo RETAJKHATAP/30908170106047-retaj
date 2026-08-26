@@ -1,0 +1,113 @@
+# ---------- aws-simulation namespace ----------
+# Simulates the "AWS side" of the multi-cloud setup: a frontend pod and a
+# backend pod, each exposed through its own ClusterIP Service.
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-content
+  namespace: aws-simulation
+data:
+  index.html: |
+    <html>
+      <body style="font-family: sans-serif; background:#232f3e; color:white; padding:2rem;">
+        <h1>ShopSphere frontend</h1>
+        <p>Namespace: aws-simulation</p>
+        <p>Simulated cloud: AWS</p>
+      </body>
+    </html>
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-content
+  namespace: aws-simulation
+data:
+  index.html: |
+    {"service": "shopsphere-backend", "namespace": "aws-simulation", "simulated_cloud": "AWS", "status": "ok"}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: aws-simulation
+  labels:
+    app: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: nginx:alpine
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: content
+              mountPath: /usr/share/nginx/html
+      volumes:
+        - name: content
+          configMap:
+            name: frontend-content
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+  namespace: aws-simulation
+spec:
+  selector:
+    app: frontend
+  ports:
+    - port: 80
+      targetPort: 80
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: aws-simulation
+  labels:
+    app: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: nginx:alpine
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: content
+              mountPath: /usr/share/nginx/html
+      volumes:
+        - name: content
+          configMap:
+            name: backend-content
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+  namespace: aws-simulation
+spec:
+  selector:
+    app: backend
+  ports:
+    - port: 80
+      targetPort: 80
+  type: ClusterIP
